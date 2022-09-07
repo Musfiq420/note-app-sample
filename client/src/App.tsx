@@ -21,17 +21,17 @@ const App:FC = () => {
       }
   }, []);
   
-  const isMobile = height/width>0.7;
+  const isMobile = width<760;
 
   return (
-    <div className='flex flex-row '>
+    <div className={`flex flex-row ${isMobile&&sideBarOpen? 'bg-white':'bg-gray-100' } h-screen`}>
 
       {isMobile&&!sideBarOpen?null: 
-      <div className={`${isMobile? 'absolute w-full':'w-2/3'} overflow-auto w-full h-screen border-x border-gray-200 bg-white`}>
+      <div className={`${isMobile? 'absolute w-full':'w-2/3'} overflow-auto w-full border-x border-gray-200 bg-white`}>
         <NoteListView isMobile={isMobile} setSideBarOpen={setSideBarOpen} />
       </div>}
 
-      <div className='overflow-hidden w-full bg-gray-100 h-screen'>
+      <div className='w-full h-full'>
         <InputForm isMobile={isMobile} setSideBarOpen={setSideBarOpen} />
       </div>      
       

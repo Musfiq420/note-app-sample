@@ -21,7 +21,7 @@ const InputForm = ({isMobile, setSideBarOpen}:Props) => {
             <span className="sr-only">Icon description</span>
           </button>:<div className='py-8'></div>}
         </div>
-        <div className="flex flex-col items-center  h-full">
+        <div className="flex flex-col items-center">
         
         <h1 className='m-3 text-xl font-bold'>Add Note</h1>
         <div className='w-full flex justify-center'>
@@ -42,7 +42,7 @@ const InputForm = ({isMobile, setSideBarOpen}:Props) => {
             onChange={(e:ChangeEvent<HTMLTextAreaElement>):void => setBody(e.target.value)}
           />
         </div>
-        <button onClick={() => dispatch(addNote({title:title, body:body}))} className="rounded-md  bg-blue-400 my-2 py-2 px-4 text-sm font-medium text-white hover:bg-blue-300 ">Save</button>
+        <button onClick={() => dispatch(addNote({title:title, body:body}))} className="rounded-md  bg-blue-400 my-6 py-2 px-4 text-sm font-medium text-white hover:bg-blue-300 ">Save</button>
       
     </div>
       </>

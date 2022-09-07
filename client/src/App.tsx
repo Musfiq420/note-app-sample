@@ -1,43 +1,40 @@
 
-import { ChangeEvent, FC, useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-
+import { FC, useEffect, useState } from 'react';
 import './App.css';
-import { INote } from './interfaces';
-import Note from './Note';
-import { RootState, store } from './store';
-import { deleteNote, getNoteList, addNote } from './store/taskSlice';
+import InputForm from './components/inputForm';
+import NoteListView from './components/noteListView';
 
 const App:FC = () => {
-  const [title, setTitle] = useState<string>('');
-  const [body, setBody] = useState<string>('');
+  const [sideBarOpen, setSideBarOpen] = useState(false)
+  const [height, setHeight] = useState<number>(window.innerHeight);
+  const [width, setWidth] = useState<number>(window.innerWidth);
 
-  const tasks = useSelector((state:RootState) => state.tasks.notes);
-  const dispatch = useDispatch();
 
+  function handleWindowSizeChange() {
+      setWidth(window.innerWidth);
+      setHeight(window.innerHeight);
+  }
   useEffect(() => {
-    dispatch(getNoteList())
-    console.log("useEffect called")
-  }, [])
+      window.addEventListener('resize', handleWindowSizeChange);
+      return () => {
+          window.removeEventListener('resize', handleWindowSizeChange);
+      }
+  }, []);
   
+  const isMobile = height/width>0.7;
 
   return (
-    <div className="App">
-      <h1>Note Creator</h1>
-      <p>Title:</p>
-      <input onChange={(e:ChangeEvent<HTMLInputElement>):void => setTitle(e.target.value)} />
-      <p>Body:</p>
-      <input onChange={(e:ChangeEvent<HTMLInputElement>):void => setBody(e.target.value)} />
-      <br /><br />
-      <button onClick={() => dispatch(addNote({title:title, body:body}))}>Add</button>
-      {tasks.map((element:INote) => {
-        return (
-          <>
-            <Note title={element.title} body={element.body} onDelete={() => dispatch(deleteNote(element.id))}/>
-          </>
-        )
-        
-      })}
+    <div className='flex flex-row '>
+
+      {isMobile&&!sideBarOpen?null: 
+      <div className={`${isMobile? 'absolute w-full':'w-2/3'} overflow-auto w-full h-screen border-x border-gray-200 bg-white`}>
+        <NoteListView isMobile={isMobile} setSideBarOpen={setSideBarOpen} />
+      </div>}
+
+      <div className='overflow-hidden w-full bg-gray-100 h-screen'>
+        <InputForm isMobile={isMobile} setSideBarOpen={setSideBarOpen} />
+      </div>      
+      
     </div> 
   );
 }

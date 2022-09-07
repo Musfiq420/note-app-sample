@@ -13,6 +13,7 @@ export const getNoteList:any= ()=> {
             //console.log(element.title+' '+element.body)
             obj.push({id:element._id,title:element.title, body:element.body})
         });
+        console.log(obj)
         dispatch(loadNotes(obj))
     }
 }

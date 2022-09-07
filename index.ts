@@ -51,7 +51,7 @@ app.post("/deleteNote", (req, res) => {
       }
   });
   
-}); 
+});  
 
 
 app.post("/addNote", (req, res) => {

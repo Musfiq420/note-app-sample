@@ -27,7 +27,7 @@ const App:FC = () => {
     <div className={`flex flex-row ${isMobile&&sideBarOpen? 'bg-white':'bg-gray-100' } h-screen`}>
 
       {isMobile&&!sideBarOpen?null: 
-      <div className={`${isMobile? 'absolute w-full':'w-2/3'} overflow-auto w-full border-x border-gray-200 bg-white`}>
+      <div className={`${isMobile? 'absolute w-full':'w-2/3'} overflow-auto w-full border-x border-gray-200 h-full bg-white`}>
         <NoteListView isMobile={isMobile} setSideBarOpen={setSideBarOpen} />
       </div>}
 

@@ -25,7 +25,7 @@
   app.use(express.static(path.join(__dirname, '../client/build')));
 
   app.get("/getNotes", (req, res) => {
-    Note.find(function(err, data) {
+    Note.find({ user: req.query.user}, function(err, data) {
         if(err) {
             console.log(error);
         }
@@ -55,8 +55,60 @@ app.post("/deleteNote", (req, res) => {
 
 
 app.post("/addNote", (req, res) => {
-  let newNote = new Note({title:req.body.title, body:req.body.body});
+  let newNote = new Note({title:req.body.title, body:req.body.body, user:req.body.user, favourite:req.body.favourite});
   newNote.save(function(err, data) {
+      if(err) {
+          console.log(error);
+      }
+      else {
+        console.log(data.id);
+          res.send({id: data.id, title:req.body.title, body:req.body.body, user:req.body.user, favourite:req.body.favourite});
+      }
+  });
+});
+
+
+app.post("/updateNote", (req, res) => {
+  const updated = {title:req.body.title, body:req.body.body, user:req.body.user, favourite:req.body.favourite}
+  Note.findByIdAndUpdate(req.body.id, updated, function(err, data) {
+      if(err) {
+          console.log(error);
+      }
+      else {
+          res.send("Data inserted");
+      }
+  });
+});
+
+
+app.post("/markFavourite", (req, res) => {
+  const updated = {favourite: req.body.favourite}
+  Note.findByIdAndUpdate(req.body.id, updated, function(err, data) {
+      if(err) {
+          console.log(error);
+      }
+      else {
+          res.send({favourite:req.body.favourite});
+      }
+  });
+});
+
+app.post("/moveToTrash", (req, res) => {
+  const dateTime = new Date()
+  const updated = {trashAt: dateTime}
+  Note.findByIdAndUpdate(req.body.id, updated, function(err, data) {
+      if(err) {
+          console.log(error);
+      }
+      else {
+          res.send("Data inserted");
+      }
+  });
+});
+
+
+app.post("/restoreNote", (req, res) => {
+  Note.findByIdAndUpdate(req.body.id, {$unset : {trashAt:1}}, function(err, data) {
       if(err) {
           console.log(error);
       }

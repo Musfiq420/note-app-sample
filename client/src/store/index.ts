@@ -2,6 +2,7 @@
 import { configureStore, EnhancedStore } from "@reduxjs/toolkit";
 import { load, save } from "redux-localstorage-simple";
 import thunk, { ThunkMiddleware } from "redux-thunk";
+import { AuthSlice } from "./authSlice";
 import { TaskSlice } from "./taskSlice";
 
 
@@ -25,7 +26,8 @@ import { TaskSlice } from "./taskSlice";
 
 export const store:EnhancedStore= configureStore({
     reducer: {
-        tasks: TaskSlice.reducer
+        tasks: TaskSlice.reducer,
+        auth: AuthSlice.reducer
     },
     //preloadedState: load({ states: ["tasks.tasks"] }),
     //middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(save({ states: ["tasks.tasks"] }), thunk )

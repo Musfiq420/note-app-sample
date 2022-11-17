@@ -106,6 +106,7 @@ export const restoreNote:any= (noteId:string) => {
 
 
 export interface NoteState {
+    currentView: String,
     selectedScreen: String,
     selectedNote: INote | null,
     notes: INote[],
@@ -113,6 +114,7 @@ export interface NoteState {
 }
 
 const initialState:NoteState = {
+    currentView: 'noteList',
     selectedScreen: 'all-notes',
     selectedNote: null,
     notes: [
@@ -147,9 +149,12 @@ export const TaskSlice = createSlice({
         },
         selectScreen: (state, action:PayloadAction<String>) => {
             state.selectedScreen=action.payload
-        }
+        },
+        selectCurrentView: (state, action:PayloadAction<String>) => {
+            state.currentView=action.payload
+        },
     },
 })
 
-export const {loadNotes, selectNote, loadTrashNotes, selectScreen, markFavouriteNote } = TaskSlice.actions;
+export const {loadNotes, selectNote, loadTrashNotes, selectScreen, markFavouriteNote, selectCurrentView} = TaskSlice.actions;
 export default TaskSlice.reducer;

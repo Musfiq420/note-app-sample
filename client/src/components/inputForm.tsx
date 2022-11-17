@@ -1,16 +1,20 @@
 import React, { ChangeEvent, useEffect, useState } from 'react'
 import { useDispatch, useSelector} from 'react-redux';
-import { addNote, getNoteList, updateNote, deleteNote, moveToTrash, restoreNote, markFavourite } from '../store/taskSlice';
+import { addNote, getNoteList, updateNote, deleteNote, moveToTrash, restoreNote, markFavourite, selectCurrentView } from '../store/taskSlice';
 import {EditorState, Modifier, RichUtils, SelectionState, convertToRaw, convertFromRaw} from 'draft-js';
 import { Editor, SyntheticKeyboardEvent } from 'react-draft-wysiwyg';
 import '../../node_modules/react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
 import { RootState } from '../store';
+import useCheckDevice from '../hooks/useCheckDevice';
 
 const InputForm = () => {
   
   const auth = useSelector((state:RootState) => state.auth);
   const selectedNote = useSelector((state:RootState) => state.tasks.selectedNote)
   const screen = useSelector((state:RootState) => state.tasks.selectedScreen)
+  const currentView = useSelector((state:RootState) => state.tasks.currentView);
+  const checkDevice = useCheckDevice();
+
 
     const [title, setTitle] = useState<string>('');
     const [editorState, setEditorState] = React.useState(
@@ -72,9 +76,14 @@ const InputForm = () => {
       <>
         
         <div className="flex flex-col items-center h-screen">
-          
-          <div className='w-3/4 flex justify-between items-center'>
-            <p>{`-> ${screen}`}</p>
+          <div className='w-11/12 flex justify-between items-center'>
+            {checkDevice==='mobile'&&currentView==='inputForm'?
+              <button className="rounded-md disabled:bg-gray-300 bg-blue-400 py-2 px-4 text-sm font-medium text-white hover:bg-blue-300 "
+              onClick={() => dispatch(selectCurrentView('noteList'))}
+            >
+              {`-> Note List`}
+            </button>
+            :<p>{`-> ${screen}`}</p>}
             {screen!=='trash'?<div className='flex justify-center items-center'>
               <div className='p-1 flex items-center justify-center'>
                 <button 
@@ -145,10 +154,11 @@ const InputForm = () => {
           
           <div className='py-4'></div>
 
-          <div className='w-3/4 flex justify-center items-center'>
+          <div className='w-5/6 flex justify-center items-center'>
             <input
                 type="text"
-                className="w-full  m-1 px-3 py-1.5 text-base font-normal text-gray-700 bg-white bg-clip-padding border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"
+                className="w-full  m-1 px-3 py-1.5 text-base font-normal text-gray-700 bg-white bg-clip-padding  rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"
+                //border border-solid border-gray-300
                 id="exampleText0"
                 placeholder="Title"
                 value={title}
@@ -156,17 +166,16 @@ const InputForm = () => {
                 onChange={(e:ChangeEvent<HTMLInputElement>):void => setTitle(e.target.value)}
               />
           </div>
-          <div className='my-3'></div>
-          <div className='w-3/4 h-2/3'>
+          {/* <div className='my-3'></div> */}
+          <div className='w-5/6 h-2/3 p-2'>
             <Editor editorState={editorState}
               placeholder="Body"
-              editorStyle={{paddingLeft: 10, paddingRight: 10, borderWidth:1, height:'50vh', overflow:'auto'}}
+              editorStyle={{paddingRight:10, paddingLeft:10, overflowY:'auto', height:(window.innerHeight*(2/3)-(0.1*window.innerHeight))}}
               toolbar={{
-                options: ['inline', 'blockType', 'fontSize', 'fontFamily', 'textAlign', 'list', 'colorPicker', 'link', 'history'],
-                inline: { inDropdown: false },
-                list: { inDropdown: true },
-                textAlign: { inDropdown: true },
-                link: { inDropdown: true },
+                options: ['inline', 'blockType', 'fontSize', 'fontFamily', 'textAlign', 'list', 'history'],
+                inline: { inDropdown: false, },
+                list: { inDropdown: false },
+                textAlign: { inDropdown: false },
                 history: { inDropdown: false },
               }}
               readOnly={screen==='trash'}

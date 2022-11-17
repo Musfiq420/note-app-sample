@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-const useCheckMobile = () => {
+const useCheckDevice = () => {
     const [width, setWidth] = useState<number>(window.innerWidth);
     
     useEffect(() => {
@@ -14,7 +14,12 @@ const useCheckMobile = () => {
         setWidth(window.innerWidth);
     }
 
-    return width<760;
+    if (width>1024)
+        return 'desktop'
+    else if (width>660)
+        return 'tablet'
+    else 
+        return 'mobile'
 }
 
-export default useCheckMobile
+export default useCheckDevice

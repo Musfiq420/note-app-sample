@@ -6,12 +6,14 @@ import { loadProfile } from "../store/authSlice";
 import { GoogleLogout } from 'react-google-login';
 import { AuthState } from "../interfaces";
 import { RootState } from "../store";
+import useCheckDevice from "../hooks/useCheckDevice";
 
 const Sidebar = () => {
 
   const [selectedValue, setSelectedValue] = useState<string>("all-notes");
 
   const auth:AuthState = useSelector((state:RootState) => state.auth);
+  const checkDevice = useCheckDevice();
   const dispatch = useDispatch()
 
   const handleChange = (e: any) => {
@@ -173,17 +175,17 @@ const Sidebar = () => {
           </div>
         </div>
         <div className="flex justify-center my-2">
-          <div className="flex justify-between items-center w-3/4 m-3 px-2 py-1 rounded bg-gray-600 ">
+          <div className={`${checkDevice==='mobile'?'mb-10':''} flex justify-between items-center w-3/4 m-3 px-2 py-1 rounded bg-gray-600`}>
             <div className="px-1 py-0 ">
               <p className="text-white text-xs font-bold">{auth.profile?auth.profile.name:''}</p>
               {/* <p className="text-white text-xs">{auth.profile?auth.profile.lastName:''}</p> */}
             </div>
-            <div className="px-1 py-1">
+            <div className={`px-1 py-1`}>
             <GoogleLogout
               clientId={auth.clientId}
               render={renderProps => (
                 // <button onClick={renderProps.onClick} disabled={renderProps.disabled}>This is my custom Google button</button>
-               <button className="p-2 bg-gray-500 rounded-full"
+               <button className={` p-2 bg-gray-500 rounded-full`}
                 onClick={renderProps.onClick}
                 disabled={renderProps.disabled}
                 >
@@ -226,6 +228,7 @@ const Sidebar = () => {
                 </svg>
               </button> */}
             </div>
+            
           </div>
         </div>
       </div>

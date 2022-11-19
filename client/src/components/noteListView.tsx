@@ -8,6 +8,7 @@ import { GoogleLogout } from 'react-google-login';
 import { loadProfile } from '../store/authSlice';
 import { Popover } from '@headlessui/react';
 import { stringify } from 'querystring';
+import useCheckDevice from '../hooks/useCheckDevice';
 
 
 const NoteListView = () => {
@@ -17,12 +18,27 @@ const NoteListView = () => {
     const trashNotes = useSelector((state:RootState) => state.tasks.trashNotes);
     const selectedNote = useSelector((state:RootState) => state.tasks.selectedNote)
     const auth = useSelector((state:RootState) => state.auth);
+    const checkDevice = useCheckDevice();
     const dispatch = useDispatch();
 
     useEffect(() => {
       dispatch(getNoteList(auth.profile.email))
       console.log("useEffect called and email: ", auth.profile.email)
   }, [])
+
+  const getFirstText:any = (body:string) => {
+    let i = 0;
+    for(i=0; i<body.length; i++)
+    {
+      if(body[i-1] === '<' && body[i] === '/')
+      {
+        console.log(body[i])
+        break;
+      }
+        
+    }
+    return body.slice(0,i+3)
+  }
 
   return (
     <div className='h-screen bg-gray-100 border-r-2  flex flex-col justify-between'>
@@ -36,7 +52,7 @@ const NoteListView = () => {
           screen==='all-notes'?notes.map((e:any) => <div className={selectedNote?selectedNote.id==e.id?'m-2 bg-blue-50 rounded-lg border-2  border-blue-200':'m-2 bg-white rounded':'m-2 bg-white rounded'}>
             <button className='p-3 w-full text-start' onClick={() => {dispatch(selectNote(e));dispatch(selectCurrentView('inputForm'))}}>
               <p className='text-md font-bold'>{e.title}</p>
-              <p className='text-sm'>{JSON.parse(e.body).blocks[0].text.length>100?`${JSON.parse(e.body).blocks[0].text.slice(0,100)}...`:JSON.parse(e.body).blocks[0].text}</p>
+              <div dangerouslySetInnerHTML={{__html: getFirstText(e.body)}}></div>
             </button>
           </div>
             ):
@@ -45,23 +61,23 @@ const NoteListView = () => {
                 return (<div className={selectedNote?selectedNote.id==e.id?'m-2 bg-blue-50 rounded-lg border-2  border-blue-200':'m-2 bg-white rounded':'m-2 bg-white rounded'}>
                 <button className='p-3 w-full text-start' onClick={() => {dispatch(selectNote(e));dispatch(selectCurrentView('inputForm'))}}>
                   <p className='text-md font-bold'>{e.title}</p>
-                  <p className='text-sm'>{JSON.parse(e.body).blocks[0].text.length>100?`${JSON.parse(e.body).blocks[0].text.slice(0,100)}...`:JSON.parse(e.body).blocks[0].text}</p>
+                  <div dangerouslySetInnerHTML={{__html: getFirstText(e.body)}}></div>
                 </button>
               </div>)
             })
             :screen==='trash'?trashNotes.map((e:any) => <div className={selectedNote?selectedNote.id==e.id?'m-2 bg-blue-50 rounded-lg border-2  border-blue-200':'m-2 bg-white rounded':'m-2 bg-white rounded'}>
             <button className='p-3 w-full text-start' onClick={() => {dispatch(selectNote(e));dispatch(selectCurrentView('inputForm'))}}>
               <p className='text-md font-bold'>{e.title}</p>
-              <p className='text-sm'>{JSON.parse(e.body).blocks[0].text.length>100?`${JSON.parse(e.body).blocks[0].text.slice(0,100)}...`:JSON.parse(e.body).blocks[0].text}</p>
+              <div dangerouslySetInnerHTML={{__html: getFirstText(e.body)}}></div>
             </button>
           </div>
             ):null
         }
         </div>
       </div>
-      {screen!=='trash'?<div className='m-5 self-end'>
+      {screen!=='trash'?<div className='m-5 mb-15 self-end'>
         <button
-                className=" p-0 w-14 h-14 bg-blue-400 rounded-full hover:bg-blue-300 active:shadow-lg mouse shadow transition ease-in duration-200 focus:outline-none"
+                className={`${checkDevice==='mobile'?'mb-10':''} p-0 w-14 h-14 bg-blue-400 rounded hover:bg-blue-300 active:shadow-lg mouse shadow transition ease-in duration-200 focus:outline-none`}
                 onClick={() => {dispatch(selectNote(null));dispatch(selectCurrentView('inputForm'))}}
                 >
           <svg viewBox="0 0 20 20" enable-background="new 0 0 20 20" className="w-6 h-6 inline-block">

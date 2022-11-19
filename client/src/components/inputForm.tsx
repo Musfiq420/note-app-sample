@@ -1,11 +1,14 @@
-import React, { ChangeEvent, useEffect, useState } from 'react'
+//@ts-nocheck
+import React, { ChangeEvent, useEffect, useRef, useState } from 'react'
 import { useDispatch, useSelector} from 'react-redux';
 import { addNote, getNoteList, updateNote, deleteNote, moveToTrash, restoreNote, markFavourite, selectCurrentView } from '../store/taskSlice';
-import {EditorState, Modifier, RichUtils, SelectionState, convertToRaw, convertFromRaw} from 'draft-js';
-import { Editor, SyntheticKeyboardEvent } from 'react-draft-wysiwyg';
-import '../../node_modules/react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
+
 import { RootState } from '../store';
 import useCheckDevice from '../hooks/useCheckDevice';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
+import '../styles.css'
+
 
 const InputForm = () => {
   
@@ -17,40 +20,31 @@ const InputForm = () => {
 
 
     const [title, setTitle] = useState<string>('');
-    const [editorState, setEditorState] = React.useState(
-      () => EditorState.createEmpty()
-    );
-    
-    
+    const [body, setBody] = useState('');
+
+  
+  const modules = {
+    toolbar: [
+      [{ 'header': [1, 2, false] }],
+      ['bold', 'italic', 'underline','blockquote'],
+      [{'list': 'ordered'}, {'list': 'bullet'}],
+      [{'align':[]}],
+      [{ 'color': [] }],
+      ['link', 'image'],
+      ['clean']   
+    ],
+  }
+
+  const formats = [
+    'header',
+    'bold', 'italic', 'underline', 'blockquote',
+    'list', 'bullet', 'align',
+    'color',
+    'link', 'image',
+    'clean'
+  ]
     
     const dispatch = useDispatch();
-
-    function handleReturn(e:SyntheticKeyboardEvent) {
-      
-      const currentContent = editorState.getCurrentContent();
-
- // create new selection state where focus is at the end
-    const blockMap = currentContent.getBlockMap();
-    const key = blockMap.last().getKey();
-    const length = blockMap.last().getLength();
-    const selection = new SelectionState({
-        anchorKey: key,
-        anchorOffset: length,
-        focusKey: key,
-        focusOffset: length,
-      });
-
-   //insert text at the selection created above 
-    const textWithInsert = Modifier.insertText(currentContent, selection, '\n');
-    const editorWithInsert = EditorState.push(editorState, textWithInsert, 'insert-characters');
-
-    //also focuses cursor at the end of the editor 
-    const newEditorState = EditorState.moveFocusToEnd(editorWithInsert);
-    setEditorState(newEditorState);
-      console.log(e.key);
-      return true;
-    }
-
 
 
     useEffect(() => {
@@ -62,12 +56,12 @@ const InputForm = () => {
     useEffect(() => {
       if(selectedNote) 
       {
-        setEditorState(EditorState.createWithContent(convertFromRaw(JSON.parse(selectedNote.body))))
+        setBody(selectedNote.body)
         setTitle(selectedNote.title)
       } 
       else 
       {
-        setEditorState(EditorState.createEmpty())
+        setBody('')
         setTitle('')
       }
 
@@ -123,7 +117,7 @@ const InputForm = () => {
                       return dispatch(updateNote({
                     id: selectedNote.id,
                     title: title,
-                    body: JSON.stringify(convertToRaw(editorState.getCurrentContent())),
+                    body: body,
                     user: auth.profile.email,
                     favourite: false,
                     trash: false
@@ -131,7 +125,7 @@ const InputForm = () => {
                   else 
                     return dispatch(addNote({
                       title: title,
-                      body: JSON.stringify(convertToRaw(editorState.getCurrentContent())),
+                      body: body,
                       user: auth.profile.email,
                       favourite: false,
                       trash: false
@@ -157,7 +151,7 @@ const InputForm = () => {
           <div className='w-5/6 flex justify-center items-center'>
             <input
                 type="text"
-                className="w-full  m-1 px-3 py-1.5 text-base font-normal text-gray-700 bg-white bg-clip-padding  rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"
+                className="w-full  mb-5 px-3 py-1.5 border border-solid border-gray-300 focus:border-gray-300 text-base font-normal text-gray-700 bg-white bg-clip-padding  rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"
                 //border border-solid border-gray-300
                 id="exampleText0"
                 placeholder="Title"
@@ -166,37 +160,16 @@ const InputForm = () => {
                 onChange={(e:ChangeEvent<HTMLInputElement>):void => setTitle(e.target.value)}
               />
           </div>
-          {/* <div className='my-3'></div> */}
-          <div className='w-5/6 h-2/3 p-2'>
-            <Editor editorState={editorState}
-              placeholder="Body"
-              editorStyle={{paddingRight:10, paddingLeft:10, overflowY:'auto', height:(window.innerHeight*(2/3)-(0.1*window.innerHeight))}}
-              toolbar={{
-                options: ['inline', 'blockType', 'fontSize', 'fontFamily', 'textAlign', 'list', 'history'],
-                inline: { inDropdown: false, },
-                list: { inDropdown: false },
-                textAlign: { inDropdown: false },
-                history: { inDropdown: false },
-              }}
-              readOnly={screen==='trash'}
-              wrapperClassName="demo-wrapper"
-              editorClassName="demo-editor"
-              onEditorStateChange={setEditorState}
-              // handleReturn={handleReturn}
-              />
+          <div className='w-5/6'>
+          <ReactQuill
+        theme="snow" value={body} onChange={setBody}
+        modules={modules}
+        formats={formats}
+        className='ql-container'
+  >
+  </ReactQuill>
           </div>
-
-        
-        {/* <div className='w-full h-1/2 flex justify-center '>
-          <textarea
-            className='min-h-fit w-2/3 mt-2 px-3 py-1.5  font-normal text-gray-700 bg-white  border border-solid border-gray-300 rounded  focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none'
-            id='exampleText0'
-            placeholder="Description"
-            onChange={(e:ChangeEvent<HTMLTextAreaElement>):void => setBody(e.target.value)}
-          />
-        </div>
-        <button onClick={() => dispatch(addNote({title:title, body:body}))} className="rounded-md  bg-blue-400 my-6 py-2 px-4 text-sm font-medium text-white hover:bg-blue-300 ">Save</button>
-       */}
+          
     </div>
       </>
       

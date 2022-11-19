@@ -13,6 +13,7 @@ import useCheckDevice from './hooks/useCheckDevice';
 import Sidebar from './components/sidebar';
 import noteIcon from "./assets/Notes-icon.png";
 import { getNoteList } from './store/taskSlice';
+import Dummy from './components/dummy';
 
 const App:FC = () => {
   
@@ -67,6 +68,7 @@ const App:FC = () => {
       </div>
       <div className='desktop:col-span-3  col-span-4'>
         <InputForm />
+        {/* <Dummy /> */}
       </div></>
       :currentView==="noteList"?
       <div className='col-span-6' >

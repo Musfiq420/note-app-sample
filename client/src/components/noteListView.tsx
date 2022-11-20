@@ -3,12 +3,7 @@ import React, {useEffect} from 'react'
 import { useDispatch, useSelector } from 'react-redux';
 import { INote } from '../interfaces';
 import { RootState } from '../store';
-import { deleteNote, getNoteList, selectCurrentView, selectNote } from '../store/taskSlice';
-import { GoogleLogout } from 'react-google-login';
-import { loadProfile } from '../store/authSlice';
-import { Popover } from '@headlessui/react';
-import { stringify } from 'querystring';
-import useCheckDevice from '../hooks/useCheckDevice';
+import { getNoteList, selectCurrentView, selectNote } from '../store/taskSlice';
 
 
 const NoteListView = () => {
@@ -18,7 +13,6 @@ const NoteListView = () => {
     const trashNotes = useSelector((state:RootState) => state.tasks.trashNotes);
     const selectedNote = useSelector((state:RootState) => state.tasks.selectedNote)
     const auth = useSelector((state:RootState) => state.auth);
-    const checkDevice = useCheckDevice();
     const dispatch = useDispatch();
 
     useEffect(() => {
@@ -77,7 +71,7 @@ const NoteListView = () => {
       </div>
       {screen!=='trash'?<div className='m-5 mb-15 self-end'>
         <button
-                className={`${checkDevice==='mobile'?'mb-10':''} p-0 w-14 h-14 bg-blue-400 rounded hover:bg-blue-300 active:shadow-lg mouse shadow transition ease-in duration-200 focus:outline-none`}
+                className={` p-0 w-14 h-14 bg-blue-400 rounded hover:bg-blue-300 active:shadow-lg mouse shadow transition ease-in duration-200 focus:outline-none`}
                 onClick={() => {dispatch(selectNote(null));dispatch(selectCurrentView('inputForm'))}}
                 >
           <svg viewBox="0 0 20 20" enable-background="new 0 0 20 20" className="w-6 h-6 inline-block">

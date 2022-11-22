@@ -7,8 +7,8 @@ import {
   moveToTrash,
   restoreNote,
   markFavourite,
-  selectCurrentView,
-} from "../store/taskSlice";
+} from "../store/noteSlice";
+import { selectCurrentView } from "../store/viewSlice";
 import { RootState } from "../store";
 import useCheckDevice from "../hooks/useCheckDevice";
 import ReactQuill from "react-quill";
@@ -18,16 +18,24 @@ import "../styles.css";
 const InputForm = () => {
   const auth = useSelector((state: RootState) => state.auth);
   const selectedNote = useSelector(
-    (state: RootState) => state.tasks.selectedNote
+    (state: RootState) => state.notes.selectedNote
   );
-  const screen = useSelector((state: RootState) => state.tasks.selectedScreen);
+  const screen = useSelector((state: RootState) => state.view.selectedScreen);
   const currentView = useSelector(
-    (state: RootState) => state.tasks.currentView
+    (state: RootState) => state.view.currentView
   );
   const checkDevice = useCheckDevice();
 
   const [title, setTitle] = useState<string>("");
-  const [body, setBody] = useState("");
+  const [body, setBody] = useState<any>("");
+
+  function handleChange(content:string, delta: any, source:any, editor:ReactQuill.UnprivilegedEditor) {
+    setBody(editor.getContents());
+  }
+
+  const [saveLoading, setSaveLoading] = useState(false);
+  const [favouriteLoading, setFavouriteLoading] = useState(false);
+  const [trashLoading, setTrashLoading] = useState(false);
 
   const modules = {
     toolbar: [
@@ -65,7 +73,7 @@ const InputForm = () => {
 
   useEffect(() => {
     if (selectedNote) {
-      setBody(selectedNote.body);
+      setBody(JSON.parse(selectedNote.body));
       setTitle(selectedNote.title);
     } else {
       setBody("");
@@ -73,47 +81,75 @@ const InputForm = () => {
     }
   }, [selectedNote]);
 
+  // useEffect(() => {
+  //   console.log(body?body['ops'][0]['insert'].slice(0,40):0)
+  // }, [body])
+
+
   return (
-    <div className="flex flex-col items-center h-screen">
-      <div className="w-11/12 flex justify-between items-center">
+    <div className="flex flex-col items-center h-screen ">
+      <div className="w-full h-1/8 flex justify-between items-center bg-gray-100">
+        <div className="flex w-3/4">
         {checkDevice === "mobile" && currentView === "inputForm" ? (
           <button
-            className="rounded-md disabled:bg-gray-300 bg-blue-400 py-2 px-4 text-sm font-medium text-white hover:bg-blue-300 "
+            className="rounded-md disabled:bg-gray-300 bg-blue-400 mx-2 py-2 px-4 text-sm font-medium text-white hover:bg-blue-300 "
             onClick={() => dispatch(selectCurrentView("noteList"))}
           >
-            {`-> Note List`}
+            {`<-`}
           </button>
-        ) : (
-          <p>{`-> ${screen}`}</p>
-        )}
+        ) : null}
+        <div className="flex justify-center w-full">
+          <input
+          type="text"
+          className="w-full mx-2 py-2 px-3 py-1.5 border border-solid border-gray-300 focus:border-gray-300 text-base font-normal text-gray-700 bg-white bg-clip-padding  rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white  focus:outline-none"
+          id="exampleText0"
+          placeholder="Title"
+          value={title}
+          disabled={screen === "trash"}
+          onChange={(e: ChangeEvent<HTMLInputElement>): void =>
+            setTitle(e.target.value)
+          }
+        />
+          
+        </div>
+        </div>
         {screen !== "trash" ? (
           <div className="flex justify-center items-center">
             <div className="p-1 flex items-center justify-center">
-              <button onClick={() => dispatch(moveToTrash(selectedNote.id))}>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                  className="w-6 h-6"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M16.5 4.478v.227a48.816 48.816 0 013.878.512.75.75 0 11-.256 1.478l-.209-.035-1.005 13.07a3 3 0 01-2.991 2.77H8.084a3 3 0 01-2.991-2.77L4.087 6.66l-.209.035a.75.75 0 01-.256-1.478A48.567 48.567 0 017.5 4.705v-.227c0-1.564 1.213-2.9 2.816-2.951a52.662 52.662 0 013.369 0c1.603.051 2.815 1.387 2.815 2.951zm-6.136-1.452a51.196 51.196 0 013.273 0C14.39 3.05 15 3.684 15 4.478v.113a49.488 49.488 0 00-6 0v-.113c0-.794.609-1.428 1.364-1.452zm-.355 5.945a.75.75 0 10-1.5.058l.347 9a.75.75 0 101.499-.058l-.346-9zm5.48.058a.75.75 0 10-1.498-.058l-.347 9a.75.75 0 001.5.058l.345-9z"
-                    clipRule="evenodd"
-                  />
-                </svg>
+              <button onClick={() => {
+                setTrashLoading(true)
+                dispatch(moveToTrash(selectedNote.id))
+                .then((e:any) => {setTrashLoading(false)})
+              }
+                }>
+                {selectedNote?trashLoading?
+                <svg aria-hidden="true" className=" w-6 h-6 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor"/>
+                <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill"/>
+            </svg>
+                :
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 m-1" fill="#757575" viewBox="0 0 448 512"><path d="M432 32H312l-9.4-18.7A24 24 0 0 0 281.1 0H166.8a23.72 23.72 0 0 0-21.4 13.3L136 32H16A16 16 0 0 0 0 48v32a16 16 0 0 0 16 16h416a16 16 0 0 0 16-16V48a16 16 0 0 0-16-16zM53.2 467a48 48 0 0 0 47.9 45h245.8a48 48 0 0 0 47.9-45L416 128H32z"/></svg>
+                :null}
               </button>
             </div>
 
             <div className="p-1 flex items-center justify-center">
               <button
                 onClick={() =>
-                  dispatch(
+                  {setFavouriteLoading(true)
+                    dispatch(
                     markFavourite(selectedNote.id, !selectedNote.favourite)
                   )
+                  .then((e:any) => {setFavouriteLoading(false)})                
+                }
                 }
               >
-                {selectedNote ? (
+                {selectedNote ? favouriteLoading?
+                <svg aria-hidden="true" className=" w-6 h-6 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor"/>
+                <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill"/>
+            </svg>
+                :(
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     fill={selectedNote.favourite ? "red" : "none"}
@@ -131,44 +167,69 @@ const InputForm = () => {
                 ) : null}
               </button>
             </div>
+            
 
+            {saveLoading?
+            
             <div className="py-5 px-2">
+              <button className="rounded-md bg-blue-400 py-2 px-4">
+                  <svg aria-hidden="true" className=" w-7 h-5 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor"/>
+                      <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill"/>
+                  </svg>
+                </button>
+            </div> 
+            :<div className="py-5 px-2">
               <button
                 className="rounded-md disabled:bg-gray-300 bg-blue-400 py-2 px-4 text-sm font-medium text-white hover:bg-blue-300 "
                 disabled={selectedNote === null && title === ""}
                 onClick={() => {
+                  setSaveLoading(true);
                   if (selectedNote)
-                    return dispatch(
+                    dispatch(
                       updateNote({
                         id: selectedNote.id,
                         title: title,
-                        body: body,
+                        body: JSON.stringify(body),
                         user: auth.profile.email,
                         favourite: false,
                         trash: false,
                       })
-                    );
+                    ).then((res:any) => {setSaveLoading(false)});
                   else
-                    return dispatch(
+                    dispatch(
                       addNote({
                         title: title,
-                        body: body,
+                        body: JSON.stringify(body),
                         user: auth.profile.email,
                         favourite: false,
                         trash: false,
                       })
-                    );
+                    ).then((res:any) => {setSaveLoading(false)});
                 }}
               >
                 Save
               </button>
-            </div>
+            </div>}
           </div>
-        ) : (
-          <div className="p-5">
+        ) : saveLoading?
+        <div className="p-5">
+              <button className="rounded-md bg-blue-400 py-2 px-4">
+                  <svg aria-hidden="true" className=" w-12 h-5 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor"/>
+                      <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill"/>
+                  </svg>
+                </button>
+            </div>
+        :(
+           <div className="p-5">
             <button
               className="rounded-md disabled:bg-gray-300 bg-blue-400 py-2 px-4 text-sm font-medium text-white hover:bg-blue-300 "
-              onClick={() => dispatch(restoreNote(selectedNote.id))}
+              onClick={() => {
+                setSaveLoading(true)
+                dispatch(restoreNote(selectedNote.id))
+                .then((e:any) => {setSaveLoading(false)})
+              }}
               disabled={selectedNote === null}
             >
               Restore
@@ -177,29 +238,16 @@ const InputForm = () => {
         )}
       </div>
 
-      <div className="py-4"></div>
-
-      <div className="w-5/6 flex justify-center items-center">
-        <input
-          type="text"
-          className="w-full  mb-5 px-3 py-1.5 border border-solid border-gray-300 focus:border-gray-300 text-base font-normal text-gray-700 bg-white bg-clip-padding  rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"
-          id="exampleText0"
-          placeholder="Title"
-          value={title}
-          disabled={screen === "trash"}
-          onChange={(e: ChangeEvent<HTMLInputElement>): void =>
-            setTitle(e.target.value)
-          }
-        />
-      </div>
-      <div className="w-5/6">
+      {/* <p>{body}</p> */}
+      <div className="w-full">
         <ReactQuill
           theme="snow"
           value={body}
-          onChange={setBody}
+          onChange={handleChange}
           modules={modules}
           formats={formats}
           className="ql-container"
+          
         />
       </div>
     </div>

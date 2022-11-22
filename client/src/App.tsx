@@ -15,7 +15,7 @@ import noteIcon from "./assets/Notes-icon.png";
 const App: FC = () => {
   const [sideBarOpen, setSideBarOpen] = useState(false);
   const currentView = useSelector(
-    (state: RootState) => state.tasks.currentView
+    (state: RootState) => state.view.currentView
   );
   const auth: AuthState = useSelector((state: RootState) => state.auth);
   const checkDevice = useCheckDevice();
@@ -30,6 +30,10 @@ const App: FC = () => {
     };
     gapi.load("client:auth2", initClient);
   });
+
+  useEffect(() => {
+    console.log(currentView)
+  }, [currentView])
 
   return (
     <>
@@ -65,11 +69,9 @@ const App: FC = () => {
             </div>
             <div
               className={`m-5 self-end absolute left-0 top-0 ${
-                checkDevice === "desktop"
-                  ? "hidden"
-                  : sideBarOpen || currentView === "inputForm"
-                  ? "hidden"
-                  : ""
+                checkDevice === "desktop"? "hidden"
+                : checkDevice === "mobile" && currentView === "inputForm" ? "hidden"
+                : ""
               } `}
             >
               <button
@@ -99,7 +101,7 @@ const App: FC = () => {
               <div className="col-span-2">
                 <NoteListView />
               </div>
-              <div className="desktop:col-span-3  col-span-4">
+              <div className={`${checkDevice==='desktop'? 'col-span-3':'col-span-4'}`}>
                 <InputForm />
               </div>
             </>

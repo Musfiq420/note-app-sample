@@ -1,18 +1,21 @@
 //https://headlessui.com/
 import React, {useEffect} from 'react'
 import { useDispatch, useSelector } from 'react-redux';
+import useCheckDevice from '../hooks/useCheckDevice';
 import { INote } from '../interfaces';
 import { RootState } from '../store';
-import { getNoteList, selectCurrentView, selectNote } from '../store/taskSlice';
+import { getNoteList, selectNote } from '../store/noteSlice';
+import { selectCurrentView } from '../store/viewSlice';
 
 
 const NoteListView = () => {
 
-    const screen = useSelector((state:RootState) => state.tasks.selectedScreen)
-    const notes = useSelector((state:RootState) => state.tasks.notes);
-    const trashNotes = useSelector((state:RootState) => state.tasks.trashNotes);
-    const selectedNote = useSelector((state:RootState) => state.tasks.selectedNote)
+    const screen = useSelector((state:RootState) => state.view.selectedScreen)
+    const notes = useSelector((state:RootState) => state.notes.allNotes);
+    const trashNotes = useSelector((state:RootState) => state.notes.trashNotes);
+    const selectedNote = useSelector((state:RootState) => state.notes.selectedNote)
     const auth = useSelector((state:RootState) => state.auth);
+    const checkDevice = useCheckDevice()
     const dispatch = useDispatch();
 
     useEffect(() => {
@@ -20,24 +23,11 @@ const NoteListView = () => {
       console.log("useEffect called and email: ", auth.profile.email)
   }, [])
 
-  const getFirstText:any = (body:string) => {
-    let i = 0;
-    for(i=0; i<body.length; i++)
-    {
-      if(body[i-1] === '<' && body[i] === '/')
-      {
-        console.log(body[i])
-        break;
-      }
-        
-    }
-    return body.slice(0,i+3)
-  }
 
   return (
     <div className='h-screen bg-gray-100 border-r-2  flex flex-col justify-between'>
       <div className='m-0 p-5'>
-          <p className='text-xl font-bold desktop:pl-0 desktop:pt-0 pt-5 pl-20 '>{screen==='all-notes'?'All Notes':screen==='favourites'?'Favourite Notes':'Trash Notes'}</p>
+          <p className={`text-xl font-bold ${checkDevice==='desktop'?'pt-0 pl-0':'pt-5 pl-20'}`}>{screen==='all-notes'?'All Notes':screen==='favourites'?'Favourite Notes':'Trash Notes'}</p>
         </div>
       <div className='h-full overflow-auto'>
         
@@ -46,7 +36,8 @@ const NoteListView = () => {
           screen==='all-notes'?notes.map((e:any) => <div className={selectedNote?selectedNote.id==e.id?'m-2 bg-blue-50 rounded-lg border-2  border-blue-200':'m-2 bg-white rounded':'m-2 bg-white rounded'}>
             <button className='p-3 w-full text-start' onClick={() => {dispatch(selectNote(e));dispatch(selectCurrentView('inputForm'))}}>
               <p className='text-md font-bold'>{e.title}</p>
-              <div dangerouslySetInnerHTML={{__html: getFirstText(e.body)}}></div>
+              {/* <div dangerouslySetInnerHTML={{__html: getFirstText(e.body)}}></div> */}
+              <p className='text-sm'>{JSON.parse(e.body)['ops'][0]['insert'].slice(0,40)}</p>
             </button>
           </div>
             ):
@@ -55,14 +46,16 @@ const NoteListView = () => {
                 return (<div className={selectedNote?selectedNote.id==e.id?'m-2 bg-blue-50 rounded-lg border-2  border-blue-200':'m-2 bg-white rounded':'m-2 bg-white rounded'}>
                 <button className='p-3 w-full text-start' onClick={() => {dispatch(selectNote(e));dispatch(selectCurrentView('inputForm'))}}>
                   <p className='text-md font-bold'>{e.title}</p>
-                  <div dangerouslySetInnerHTML={{__html: getFirstText(e.body)}}></div>
+                  {/* <div dangerouslySetInnerHTML={{__html: getFirstText(e.body)}}></div> */}
+                  <p className='text-sm'>{JSON.parse(e.body)['ops'][0]['insert'].slice(0,40)}</p>
                 </button>
               </div>)
             })
             :screen==='trash'?trashNotes.map((e:any) => <div className={selectedNote?selectedNote.id==e.id?'m-2 bg-blue-50 rounded-lg border-2  border-blue-200':'m-2 bg-white rounded':'m-2 bg-white rounded'}>
             <button className='p-3 w-full text-start' onClick={() => {dispatch(selectNote(e));dispatch(selectCurrentView('inputForm'))}}>
               <p className='text-md font-bold'>{e.title}</p>
-              <div dangerouslySetInnerHTML={{__html: getFirstText(e.body)}}></div>
+              {/* <div dangerouslySetInnerHTML={{__html: getFirstText(e.body)}}></div> */}
+              <p className='text-sm'>{JSON.parse(e.body)['ops'][0]['insert'].slice(0,40)}</p>
             </button>
           </div>
             ):null

@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import noteIcon from "../assets/Notes-icon.png";
-import { selectNote, selectScreen } from "../store/taskSlice";
+import { selectNote } from "../store/noteSlice";
+import { selectScreen } from "../store/viewSlice";
 import { loadProfile } from "../store/authSlice";
 import { GoogleLogout } from "react-google-login";
 import { AuthState } from "../interfaces";

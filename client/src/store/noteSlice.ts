@@ -20,7 +20,7 @@ export const getNoteList:any= (user:string)=> {
 
         });
         console.log(notes)
-        dispatch(loadNotes(notes))
+        dispatch(loadAllNotes(notes))
         dispatch(loadTrashNotes(trashNotes))
     }
 }
@@ -103,21 +103,15 @@ export const restoreNote:any= (noteId:string) => {
 
 
 
-
-
 export interface NoteState {
-    currentView: String,
-    selectedScreen: String,
     selectedNote: INote | null,
-    notes: INote[],
+    allNotes: INote[],
     trashNotes: ITrashNote[]
 }
 
 const initialState:NoteState = {
-    currentView: 'noteList',
-    selectedScreen: 'all-notes',
     selectedNote: null,
-    notes: [
+    allNotes: [
         // {
         //     id:"Note ID",
         //     title:"Note Title",
@@ -127,15 +121,15 @@ const initialState:NoteState = {
         //     trash: false
         // }
     ],
-    trashNotes: []
+    trashNotes: [],
 }
 
-export const TaskSlice = createSlice({
-    name: 'tasks',
+export const NoteSlice = createSlice({
+    name: 'notes',
     initialState,
     reducers: {
-        loadNotes:(state, action:PayloadAction<INote[]>) => {
-            state.notes=action.payload
+        loadAllNotes:(state, action:PayloadAction<INote[]>) => {
+            state.allNotes=action.payload
         },
         loadTrashNotes:(state, action:PayloadAction<ITrashNote[]>) => {
             state.trashNotes=action.payload
@@ -147,14 +141,8 @@ export const TaskSlice = createSlice({
             if(state.selectedNote) 
                 state.selectedNote.favourite=action.payload
         },
-        selectScreen: (state, action:PayloadAction<String>) => {
-            state.selectedScreen=action.payload
-        },
-        selectCurrentView: (state, action:PayloadAction<String>) => {
-            state.currentView=action.payload
-        },
     },
 })
 
-export const {loadNotes, selectNote, loadTrashNotes, selectScreen, markFavouriteNote, selectCurrentView} = TaskSlice.actions;
-export default TaskSlice.reducer;
+export const {loadAllNotes, selectNote, loadTrashNotes, markFavouriteNote} = NoteSlice.actions;
+export default NoteSlice.reducer;

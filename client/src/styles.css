@@ -1,4 +1,16 @@
 
-    .ql-container{
+   .quill .ql-container{
+      /* height:70vh; */
+      border: 0px;
+    }
+
+    .quill .ql-editor{
       height:70vh;
+      border:0px;
+    }
+
+    .quill .ql-toolbar{
+      /* height:70vh; */
+      border-left:0px;
+      border-right:0px;
     }

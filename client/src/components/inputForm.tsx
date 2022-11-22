@@ -49,6 +49,10 @@ const InputForm = () => {
     ],
   };
 
+  const noToolbarModules = {
+    toolbar: false
+  };
+
   const formats = [
     "header",
     "bold",
@@ -244,9 +248,10 @@ const InputForm = () => {
           theme="snow"
           value={body}
           onChange={handleChange}
-          modules={modules}
+          modules={screen==='trash'?noToolbarModules:modules}
           formats={formats}
-          className="ql-container"
+          className="quill"
+          readOnly={screen==='trash'}
           
         />
       </div>

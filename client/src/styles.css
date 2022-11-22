@@ -14,3 +14,7 @@
       border-left:0px;
       border-right:0px;
     }
+
+    .quill-trash .ql-toolbar{
+      display: none;
+    }

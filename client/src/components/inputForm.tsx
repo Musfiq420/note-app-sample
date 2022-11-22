@@ -37,6 +37,7 @@ const InputForm = () => {
   const [favouriteLoading, setFavouriteLoading] = useState(false);
   const [trashLoading, setTrashLoading] = useState(false);
 
+
   const modules = {
     toolbar: [
       [{ header: [1, 2, false] }],
@@ -49,9 +50,9 @@ const InputForm = () => {
     ],
   };
 
-  const noToolbarModules = {
-    toolbar: false
-  };
+  // const noToolbarModules = {
+  //   toolbar: false
+  // };
 
   const formats = [
     "header",
@@ -85,9 +86,6 @@ const InputForm = () => {
     }
   }, [selectedNote]);
 
-  // useEffect(() => {
-  //   console.log(body?body['ops'][0]['insert'].slice(0,40):0)
-  // }, [body])
 
 
   return (
@@ -107,7 +105,7 @@ const InputForm = () => {
           type="text"
           className="w-full mx-2 py-2 px-3 py-1.5 border border-solid border-gray-300 focus:border-gray-300 text-base font-normal text-gray-700 bg-white bg-clip-padding  rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white  focus:outline-none"
           id="exampleText0"
-          placeholder="Title"
+          placeholder={screen==='trash'?'':'Title'}
           value={title}
           disabled={screen === "trash"}
           onChange={(e: ChangeEvent<HTMLInputElement>): void =>
@@ -248,9 +246,9 @@ const InputForm = () => {
           theme="snow"
           value={body}
           onChange={handleChange}
-          modules={screen==='trash'?noToolbarModules:modules}
+          modules={modules}
           formats={formats}
-          className="quill"
+          className={`${screen==='trash'?'quill-trash':'quill'}`}
           readOnly={screen==='trash'}
           
         />

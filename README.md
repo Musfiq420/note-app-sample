@@ -24,25 +24,25 @@ Make sure you have the following installed:
 
 ### Installation
 1. **Clone the repository**:  
-   bash```
+   ```bash
    git clone https://github.com/Musfiq420/note-app-sample.git
    cd note-app-sample
    ```
 
 2. **Install dependencies**:  
-   bash```
+   ```bash
    npm install
    ```
 
 3. **Set up environment variables**:  
    Create a `.env` file in the root directory and add:
-   bash```
+   ```bash
    MONGODB_URI=<your-mongodb-connection-string>
    PORT=3000
    ```
 
 4. **Run the application**:  
-   bash```
+   ```bash
    npm start
    ```
 
@@ -57,15 +57,15 @@ The live version of this project is deployed on Render. You can access it here:
 Contributions are welcome!  
 1. Fork the repository.  
 2. Create a new branch:  
-   bash```
+   ```bash
    git checkout -b feature/your-feature-name
    ```
 3. Commit your changes:  
-   bash```
+   ```bash
    git commit -m 'Add some feature'
    ```
 4. Push to the branch:  
-   bash```
+   ```bash
    git push origin feature/your-feature-name
    ```
 5. Open a pull request.
